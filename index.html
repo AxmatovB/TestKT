@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Sinovlari</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #f5f5f5; }
+        .container { max-width: 800px; margin: 0 auto; padding: 20px; }
+        
+        .start-screen { text-align: center; padding: 100px 20px; }
+        .start-btn { 
+            background: #ff6b35; color: white; border: none; 
+            padding: 15px 30px; font-size: 18px; border-radius: 8px; cursor: pointer; 
+        }
+        .start-btn:hover { background: #e55a2b; }
+        
+        .subjects { display: none; text-align: center; }
+        .subjects h2 { margin-bottom: 30px; color: #333; }
+        .subject-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 20px; }
+        .subject-btn { 
+            background: #666; color: white; border: none; 
+            padding: 20px; border-radius: 8px; cursor: pointer; font-size: 16px;
+        }
+        .subject-btn:hover { background: #555; }
+        .subject-btn.active { background: #ff6b35; }
+        
+        .test-area { display: none; }
+        .question { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .question h3 { color: #333; margin-bottom: 15px; }
+        .options { list-style: none; }
+        .options li { margin: 8px 0; }
+        .options input { margin-right: 10px; }
+        .options label { cursor: pointer; }
+        
+        .controls { text-align: center; margin: 20px 0; }
+        .check-btn { 
+            background: #ff6b35; color: white; border: none; 
+            padding: 12px 25px; font-size: 16px; border-radius: 8px; cursor: pointer;
+        }
+        .check-btn:hover { background: #e55a2b; }
+        
+        .results { display: none; text-align: center; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .chart-container { width: 250px; height: 250px; margin: 20px auto; }
+        
+        .back-btn { 
+            background: #666; color: white; border: none; 
+            padding: 10px 20px; border-radius: 8px; cursor: pointer; margin: 10px;
+        }
+        .back-btn:hover { background: #555; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Boshlash ekrani -->
+        <div id="startScreen" class="start-screen">
+            <h1 style="color: #333; margin-bottom: 30px;">Testni boshlaymiz, sizga omad 🤗</h1>
+            <button class="start-btn" onclick="showSubjects()">Boshlash</button>
+        </div>
+
+        <!-- Mavzular tanlash -->
+        <div id="subjects" class="subjects">
+            <h2>Mavzuni tanlang</h2>
+            <div class="subject-grid">
+               <!-- <button class="subject-btn" onclick="startTest(1)">1-Mavzu</button>
+                <button class="subject-btn" onclick="startTest(2)">2-Mavzu</button>
+                <button class="subject-btn" onclick="startTest(3)">3-Mavzu</button> -->
+                <button class="subject-btn active" onclick="startTest(4)">4-Mavzu</button>
+               <!-- <button class="subject-btn" onclick="startTest(5)">5-Mavzu</button>
+                <button class="subject-btn" onclick="startTest(6)">6-Mavzu</button>
+                <button class="subject-btn" onclick="startTest(7)">7-Mavzu</button> -->
+                <button class="subject-btn" onclick="startTest(0)">Umumiy Test</button>
+            </div>
+            <button class="back-btn" onclick="showStart()">Orqaga</button>
+        </div>
+
+        <!-- Test o'tash -->
+        <div id="testArea" class="test-area">
+            <div id="questions"></div>
+            <div class="controls">
+                <button class="check-btn" onclick="checkAnswers()">Tekshirish</button>
+                <button class="back-btn" onclick="showSubjects()">Orqaga</button>
+            </div>
+        </div>
+
+        <!-- Natijalar -->
+        <div id="results" class="results">
+            <h2>Test Natijalari</h2>
+            <div id="resultText"></div>
+            <div class="chart-container">
+                <canvas id="resultChart" width="250" height="250"></canvas>
+            </div>
+            <button class="back-btn" onclick="showSubjects()">Boshqa test</button>
+        </div>
+    </div>
+
+    <script>
+        // 4-mavzu testlari
+        const tests = {
+            4: [
+                {
+                    question: "Kompyuter tarmoqlarida xizmat ko'rsatish sifati (QoS) nima?",
+                    options: [
+                        "Tarmoqning ishonchli va prognoz qilinadigan ishlashini ta'minlaydigan turli xususiyatlarning yig'indisi",
+                        "Faqat internetga ulanish tezligi",
+                        "Kompyuterlar sonining ko'pligi",
+                        "Tarmoq kabellarining uzunligi"
+                    ],
+                    correct: 0
+                },
+                {
+                    question: "Tarmoq samaradorligi qanday ko'rsatkichlar asosida baholanadi?",
+                    options: [
+                        "Subyektiv, Miqdoriy va Vaqt bo'yicha",
+                        "Faqat tezlik asosida",
+                        "Faqat xavfsizlik asosida",
+                        "Faqat narx asosida"
+                    ],
+                    correct: 0
+                },
+                {
+                    question: "Subyektiv ko'rsatkichlarga nima kiradi?",
+                    options: [
+                        "Foydalanuvchi idroki, foydalanish qulayligi, xizmat ishonchliligi",
+                        "Faqat ping va kechikish",
+                        "Faqat download tezligi",
+                        "Faqat shifrlash usullari"
+                    ],
+                    correct: 0
+                },
+                {
+                    question: "Ma'lumotlarni uzatish tezligi qanday o'lchanadi?",
+                    options: [
+                        "Mbps yoki Gbps",
+                        "KB yoki MB",
+                        "Hz yoki KHz",
+                        "Volt yoki Amper"
+                    ],
+                    correct: 0
+                },
+                {
+                    question: "Uptime nima?",
+                    options: [
+                        "Tarmoqning ishlash davomiyligi, 99.99% kabi baholanadi",
+                        "Kompyuterning yoqilgan vaqti",
+                        "Internetga ulanish tezligi",
+                        "Faylni yuklash vaqti"
+                    ],
+                    correct: 0
+                },
+                {
+                    question: "SSL/TLS nima uchun ishlatiladi?",
+                    options: [
+                        "Ma'lumotlarni shifrlash uchun",
+                        "Faqat sayt dizayni uchun",
+                        "Kompyuterni tezlashtirish uchun",
+                        "Fayllarni siqish uchun"
+                    ],
+                    correct: 0
+                },
+                {
+                    question: "AES-256 nima?",
+                    options: [
+                        "Harbiy darajadagi shifrlash algoritmi",
+                        "Video format turi",
+                        "Tarmoq protokoli",
+                        "Fayl tizimi"
+                    ],
+                    correct: 0
+                },
+                {
+                    question: "VPN (Virtual Private Network) ning asosiy vazifasi nima?",
+                    options: [
+                        "Internetdagi tranzit ma'lumotlarni shifrlash orqali himoyalash",
+                        "Faqat internetni tezlashtirish",
+                        "Faqat saytlarni bloklash",
+                        "Faqat viruslardan himoyalash"
+                    ],
+                    correct: 0
+                },
+                {
+                    question: "WPA3 nima uchun ishlatiladi?",
+                    options: [
+                        "Wi-Fi tarmoqlarini himoya qilish uchun",
+                        "Faqat internet tezligini oshirish uchun",
+                        "Faqat kompyuterni tozalash uchun",
+                        "Faqat mobil aloqa uchun"
+                    ],
+                    correct: 0
+                },
+                {
+                    question: "Qisqa muddatli xarakteristikalarga nima kiradi?",
+                    options: [
+                        "Joriy kechikish, tarmoq yuklanishi, paketlarning yo'qolishi",
+                        "Faqat yillik hisobotlar",
+                        "Faqat apparat vositalari narxi",
+                        "Faqat xodimlar soni"
+                    ],
+                    correct: 0
+                },
+                {
+                    question: "O'rta muddatli xarakteristikalar qancha vaqtni qamrab oladi?",
+                    options: [
+                        "Kunlik va haftalik tahlillar",
+                        "Faqat bir soatlik",
+                        "Faqat yillik",
+                        "Faqat bir daqiqalik"
+                    ],
+                    correct: 0
+                },
+                {
+                    question: "Speedtest.net qanday maqsadda ishlatiladi?",
+                    options: [
+                        "Tezlik va kechikish testlari uchun",
+                        "Faqat sayt dizayni uchun",
+                        "Faqat o'yinlar uchun",
+                        "Faqat video tomosha qilish uchun"
+                    ],
+                    correct: 0
+                },
+                {
+                    question: "QoS (Quality of Service) ning asosiy maqsadi nima?",
+                    options: [
+                        "Tarmoq resurslarini optimal taqsimlash va sifatli xizmat ko'rsatish",
+                        "Faqat internet narxini kamaytirish",
+                        "Faqat kompyuter tezligini oshirish",
+                        "Faqat viruslarni yo'q qilish"
+                    ],
+                    correct: 0
+                },
+                {
+                    question: "Overprovisioning nima?",
+                    options: [
+                        "Tarmoq har doim yuklanmagan holda saqlanishi kerak degan yondashuv",
+                        "Tarmoqni ortiqcha yuklash",
+                        "Faqat kechikishni oshirish",
+                        "Faqat xavfsizlikni kamaytirish"
+                    ],
+                    correct: 0
+                },
+                {
+                    question: "QoS tarmoq qurilmalariga qanday ta'sir qiladi?",
+                    options: [
+                        "Router va switch'lar turli trafik turlarini tanib olish va boshqarishlari kerak bo'ladi",
+                        "Faqat tarmoqni sekinlashtiradi",
+                        "Hech qanday ta'sir qilmaydi",
+                        "Faqat narxni oshiradi"
+                    ],
+                    correct: 0
+                },
+                 {
+                    question: "Trafik Shakllantirish (Traffic Shaping) nima?",
+                    options: [
+                        "Tarmoqda ortiqcha yuklanishning oldini olish uchun trafik oqimi tartibga solish",
+                        "Tarmoqni ortiqcha yuklash",
+                        "Faqat kechikishni oshirish",
+                        "Faqat xavfsizlikni kamaytirish"
+                    ],
+                    correct: 0
+                }, 
+                
+            ]
+        };
+
+        let currentTest = [];
+        let shuffledQuestions = [];
+        
+        function showStart() {
+            document.getElementById('startScreen').style.display = 'block';
+            document.getElementById('subjects').style.display = 'none';
+            document.getElementById('testArea').style.display = 'none';
+            document.getElementById('results').style.display = 'none';
+        }
+
+        function showSubjects() {
+            document.getElementById('startScreen').style.display = 'none';
+            document.getElementById('subjects').style.display = 'block';
+            document.getElementById('testArea').style.display = 'none';
+            document.getElementById('results').style.display = 'none';
+        }
+
+        function shuffleArray(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
+        function startTest(subject) {
+            if (subject === 4) {
+                currentTest = tests[4];
+                shuffledQuestions = shuffleArray([...currentTest]);
+                displayQuestions();
+                document.getElementById('subjects').style.display = 'none';
+                document.getElementById('testArea').style.display = 'block';
+            } else {
+                alert('Bu mavzu hali qo\'shilmagan!');
+            }
+        }
+
+        function displayQuestions() {
+            const container = document.getElementById('questions');
+            container.innerHTML = '';
+
+            shuffledQuestions.forEach((q, index) => {
+                const shuffledOptions = shuffleArray([...q.options]);
+                const correctAnswerText = q.options[q.correct];
+                const newCorrectIndex = shuffledOptions.indexOf(correctAnswerText);
+
+                const questionDiv = document.createElement('div');
+                questionDiv.className = 'question';
+                questionDiv.innerHTML = `
+                    <h3>${index + 1}. ${q.question}</h3>
+                    <ul class="options">
+                        ${shuffledOptions.map((option, i) => 
+                            `<li>
+                                <input type="radio" name="q${index}" value="${i}" id="q${index}_${i}">
+                                <label for="q${index}_${i}">${option}</label>
+                            </li>`
+                        ).join('')}
+                    </ul>
+                `;
+                questionDiv.dataset.correct = newCorrectIndex;
+                container.appendChild(questionDiv);
+            });
+        }
+
+        function checkAnswers() {
+            let correct = 0;
+            const questions = document.querySelectorAll('.question');
+            
+            questions.forEach((q, index) => {
+                const selected = document.querySelector(`input[name="q${index}"]:checked`);
+                if (selected && parseInt(selected.value) === parseInt(q.dataset.correct)) {
+                    correct++;
+                }
+            });
+
+            const total = questions.length;
+            const wrong = total - correct;
+            
+            document.getElementById('resultText').innerHTML = 
+                `<p style="font-size: 18px; margin: 20px 0;">
+                    Jami savollar: ${total}<br>
+                    To'g'ri javoblar: ${correct}<br>
+                    Noto'g'ri javoblar: ${wrong}<br>
+                    Foiz: ${Math.round((correct/total)*100)}%
+                </p>`;
+
+            drawChart(correct, wrong);
+            
+            document.getElementById('testArea').style.display = 'none';
+            document.getElementById('results').style.display = 'block';
+        }
+
+        function drawChart(correct, wrong) {
+            const canvas = document.getElementById('resultChart');
+            const ctx = canvas.getContext('2d');
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const radius = 80;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const total = correct + wrong;
+            if (total === 0) return;
+
+            const correctAngle = (correct / total) * 2 * Math.PI;
+            const wrongAngle = (wrong / total) * 2 * Math.PI;
+
+            // To'g'ri javoblar (yashil)
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius, 0, correctAngle);
+            ctx.lineTo(centerX, centerY);
+            ctx.fillStyle = '#4CAF50';
+            ctx.fill();
+
+            // Noto'g'ri javoblar (qizil)
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius, correctAngle, correctAngle + wrongAngle);
+            ctx.lineTo(centerX, centerY);
+            ctx.fillStyle = '#ff6b35';
+            ctx.fill();
+
+            // Legend
+            ctx.fillStyle = '#4CAF50';
+            ctx.fillRect(centerX - 100, centerY + 100, 15, 15);
+            ctx.fillStyle = '#333';
+            ctx.font = '14px Arial';
+            ctx.fillText(`To'g'ri: ${correct}`, centerX - 80, centerY + 112);
+
+            ctx.fillStyle = '#ff6b35';
+            ctx.fillRect(centerX + 20, centerY + 100, 15, 15);
+            ctx.fillStyle = '#333';
+            ctx.fillText(`Noto'g'ri: ${wrong}`, centerX + 40, centerY + 112);
+        }
+    </script>
+</body>
+</html>
