@@ -275,14 +275,11 @@
         </div>
 
         <div class="content">
-            <!-- Boshlash ekrani -->
             <div class="start-screen" id="startScreen">
                 <h2>Testni boshlash uchun tugmani bosing</h2>
                 <br>
                 <button class="start-btn" onclick="showSubjects()">Boshlash</button>
             </div>
-
-            <!-- Mavzu tanlash -->
             <div class="subject-selection" id="subjectSelection">
                 <h2>Mavzuni tanlang:</h2>
                 <div class="subjects-grid">
@@ -376,19 +373,14 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Test maydoni -->
             <div class="test-area" id="testArea">
                 <h2 id="testTitle"></h2>
                 <div class="all-questions-container" id="allQuestions">
-                    <!-- Bu yerda barcha savollar chiqadi -->
                 </div>
                 <div class="finish-button-container">
                     <button class="finish-btn" onclick="finishTest()">Testni yakunlash</button>
                 </div>
             </div>
-
-            <!-- Natijalar -->
             <div class="results" id="results">
                 <h2>Test yakunlandi!</h2>
                 <div class="score" id="scoreDisplay"></div>
@@ -10246,11 +10238,7 @@
             currentSubject = subject;
             currentQuestion = 0;
             userAnswers = [];
-            
-            // Savollarni aralashtirib olish
             questions = shuffleArray([...testData[subject].questions]);
-            
-            // Har bir savolning variantlarini ham aralashtirish
             questions = questions.map(question => {
                 const correctAnswer = question.options[question.correct];
                 const shuffledOptions = shuffleArray([...question.options]);
@@ -10268,8 +10256,6 @@
             
             showAllQuestions();
         }
-
-        // Array elementlarini aralashtirish funksiyasi
         function shuffleArray(array) {
             const shuffled = [...array];
             for (let i = shuffled.length - 1; i > 0; i--) {
@@ -10306,15 +10292,9 @@
 
         function selectOption(questionIndex, optionIndex) {
             userAnswers[questionIndex] = optionIndex;
-            
-            // Remove selected class from all options in this question
             const allOptions = document.querySelectorAll(`#options-${questionIndex} li`);
             allOptions.forEach(option => option.classList.remove('selected'));
-            
-            // Add selected class to clicked option
             document.getElementById(`option-${questionIndex}-${optionIndex}`).classList.add('selected');
-            
-            // Mark question as answered
             document.getElementById(`question-${questionIndex}`).classList.add('answered');
         }
 
@@ -10348,7 +10328,6 @@
             document.getElementById('scoreDisplay').textContent = `${correctAnswers}/${questions.length} (${percentage}%)`;
             document.getElementById('questionReview').innerHTML = reviewHTML;
             
-            // Pie Chart
             const ctxPie = document.getElementById('pieChart').getContext('2d');
             new Chart(ctxPie, {
                 type: 'pie',
@@ -10368,8 +10347,7 @@
                     }
                 }
             });
-            
-            // Area Chart
+        
             const ctxArea = document.getElementById('areaChart').getContext('2d');
             const questionResults = questions.map((question, index) => ({
                 question: `S${index + 1}`,
@@ -10416,7 +10394,6 @@
             document.getElementById('subjectSelection').style.display = 'block';
         }
 
-        // Sahifa yuklanganda boshlash
         window.onload = function() {
             document.getElementById('startScreen').style.display = 'block';
         };
